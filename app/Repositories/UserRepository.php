@@ -12,31 +12,12 @@ class UserRepository {
      */
     public function getUserBasedOnUuid($uuid){
         try {
-            $this->UserModel = $this->UserModel->where('uuid', $uuid)->first();
-            if($this->UserModel == null)
-                $this->UserModel = new User();
-            return $this->UserModel;
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            return $this->clusterPoint->getUserByID($uuid);
         }
         catch(\Exception $e){
-            $this->UserModel = new User();
-            return $this->UserModel;
-        }
-    }
-
-    /**
-     * @param $id           integer, the id of the user
-     * @return              User, the information of the user based on id
-     */
-    public function getUserBasedOnId($id){
-        try{
-            $this->UserModel = $this->UserModel->where('id',$id)->first();
-            if($this->UserModel == null)
-                $this->UserModel = new User();
-            return $this->UserModel;
-        }
-        catch(\Exception $e){
-            $this->UserModel = new User();
-            return $this->UserModel;
+            return -1;
         }
     }
 
@@ -59,16 +40,16 @@ class UserRepository {
      * Updates the information of the user
      *
      * @param $userInfo     array, the information of the user that wants to be updated
+     * @param $languages    array, the list of languages
      */
-    public function updateUserInfo(array $userInfo){
-
-        foreach($userInfo as $key => $value)
-        {
-            $this->UserModel->{$key} = $value;
+    public function updateUserInfo(array $userInfo,$languages){
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            $this->clusterPoint->updateUserInfo($userInfo,$languages);
         }
-
-        $this->UserModel->save();
-        return $this->UserModel;
+        catch(\Exception $e){
+        }
     }
 
     /**
@@ -130,41 +111,6 @@ class UserRepository {
         }
         $this->UserModel->role = $resultLevel;
         return $this->UserModel;
-    }
-
-    /**
-     * Gets the role of the user
-     * @return User plus the role of the user,
-     *               1 -> Community Hero Member
-     *               2 -> Teatak Member
-     *               3 -> Community Member
-     */
-    //TODO: write unit tests
-    public function getUserRole()
-    {
-        $userLevels = $this->UserModel->levels;
-        $resultLevel = 3;
-        foreach($userLevels as $level)
-        {
-            if($level->id == 5){//TODO: change 5 to constant
-                $resultLevel = 1;
-            }
-            else if($level->id == 6){//TODO: change 6 to constant
-                $resultLevel = 2;
-                break;
-            }
-        }
-        $this->UserModel->role = $resultLevel;
-        return $this->UserModel;
-    }
-
-    public function setUserLevel($int)
-    {
-        //TODO: set the user level
-        //TODO: write unit tests and stuff
-        /*$levelRepo = new LevelRepository(new \App\Level());
-        $this->GroupModel->users()->attach($user);
-        $this->UserModel->attach*/
     }
 
     public function insertUserInfo($userInfo)

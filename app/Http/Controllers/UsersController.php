@@ -178,36 +178,30 @@ class UsersController extends Controller
      * Update the specified resource in storage.
      *
      * @param  Request $request
-     * @param  \App\User the information of the user
+     * @param  userID String the information of the user
      * @return Response
      */
     //TODO: must write tests
-    public function update(Request $request, User $user)
+    public function update(Request $request, $userID)
     {
-
-        if ($user->toArray() == [])
+        $userRepo = new UserRepository();
+        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
+        if ($userIDCluster == -1)
             \App::abort(404, 'The API doesn\'t exist');
 
-        if ($request->get('first_name') &&
-            $request->get('last_name') &&
-            $request->get('birth_date') &&
-            $request->get('gender') &&
-            $request->get('country_iso')
+        if ($request->get('full_name') &&
+            $request->get('about') &&
+            $request->get('languages')
         ) {
-            Libraries\ImageHelper::saveTheProfileImage($request, $user);
-
-            $countryRepo = new CountryRepository(new \App\Country);
-            $country = $countryRepo->getCountryBaseOnISO($request->get('country_iso'));
             $userInfo = [
-                "first_name" => $request->get('first_name'),
-                "last_name" => $request->get('last_name'),
-                "country_id" => $country->id,
-                "date_of_birth" => $request->get('birth_date'),
-                "gender" => $request->get('gender') == 'male' ? 1 : 0,
+                "uuid" => $userID,
+                "full_name" => $request->get('full_name'),
+                "about" => $request->get('about')
             ];
 
-            $userRepo = new UserRepository($user);
-            $userRepo->updateUserInfo($userInfo);
+            $languages = json_decode($request->get('languages'));
+
+            $userRepo->updateUserInfo($userInfo,$languages);
         } else {
             \App::abort(400, 'The contract of the api was not met');
         }

@@ -12,17 +12,11 @@
 */
 
 Route::bind('uuid',function($uuid){
-
-    $userModel = new \Repositories\UserRepository(new \App\User);
-    return $userModel->getUserBasedOnUuid($uuid);
-
+    return $uuid;
 });
 
 Route::bind('email',function($email){
-
-    $userModel = new \Repositories\UserRepository(new \App\User);
-    return $userModel->getUserBasedOnEmail($email);
-
+    return $email;
 });
 
 //caa126a6-b0b8-440c-8512-9c506264bf61
