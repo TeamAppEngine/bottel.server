@@ -10,8 +10,8 @@ namespace App\Http\Libraries;
 
 class ClusterPoint
 {
-    const API_KEY = "6ee7d4ed-7bac-4bba-bc7f-42155ace8d6e";
-    const ID = 218189;
+
+    private $cpsConn;
 
     public function __construct()
     {
@@ -24,7 +24,7 @@ class ClusterPoint
         );
 
         // Creating a CPS_Connection instance
-        $cpsConn = new \CPS_Connection(
+        $this->cpsConn = new \CPS_Connection(
             new \CPS_LoadBalancer($connectionStrings),
             getenv('DB_NAME'),
             getenv('DB_USERNAME'),
@@ -35,73 +35,34 @@ class ClusterPoint
         );
 
         // Debug
-        //$cpsConn->setDebug(true);
+        //$this->cpsConn->setDebug(true);
+    }
+
+    public function getUserByEmail($email){
 
         // Creating a CPS_Simple instance
-        $cpsSimple = new \CPS_Simple($cpsConn);
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
 
-        $query = CPS_Term('Iran');
-
-        $offset = 0;
-
-        $docs = 5;
+        $query = CPS_Term($email,'email');
 
         $list = array(
-            'id' => 'yes',
-            'x' => 'yes',
-            'y' => 'yes',
-            'about' => 'yes',
-            'country' => 'yes',
-            'conversations' => 'yes',
+            'id' => 'yes'
         );
 
-        $documents = $cpsSimple->search($query, $offset, $docs, $list);
-        /*$doc = $cpsSimple->retrieveSingle(1);
-        var_dump($doc);*/
-        // Looping through results
+        $documents = $cpsSimple->search($query, NULL, NULL, $list);
 
         foreach ($documents as $id => $document) {
-            echo $document->x . ' ' . $document->y."\n";
+            return $document->id;
         }
+
+        return -1;
     }
 
-    public function createUser($userName, $displayName)
-    {
-        $restApi = new RestAPI();
-        $sendData = array(
-            "account_id" => self::ID,
-            "api_key" => self::API_KEY,
-            "user_name" => $userName,
-            "user_display_name" => $displayName,
-            "user_password" => 1234567
-        );
+    public function insertUser($userInfo){
 
-        $apiResult = $restApi->CallAPIGuzzle("GET", "https://api.voximplant.com/platform_api/AddUser/", $sendData);
-        $result = json_decode($apiResult);
+        // Creating a CPS_Simple instance
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
 
-        if ($result->{"result"} == 1)
-            return $this->assignToApplication($userName);
-        else
-            return false;
-    }
-
-    public function assignToApplication($userName)
-    {
-        $restApi = new RestAPI();
-
-        $sendData = array(
-            "account_id" => self::ID,
-            "api_key" => self::API_KEY,
-            "user_name" => $userName,
-            "application_name" => "app"
-        );
-
-        $apiResult = $restApi->CallAPIGuzzle("GET", "https://api.voximplant.com/platform_api/BindUser/", $sendData);
-        $result = json_decode($apiResult);
-
-        if ($result->{"result"} == 1)
-            return true;
-        else
-            return false;
+        $cpsSimple->insertSingle($userInfo["uuid"],$userInfo);
     }
 }

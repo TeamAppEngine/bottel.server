@@ -10,8 +10,8 @@ namespace App\Http\Libraries;
 
 class VoxImplantServer
 {
-    const API_KEY = "6ee7d4ed-7bac-4bba-bc7f-42155ace8d6e";
-    const ID = 218189;
+    const API_KEY = "5ffb90d7-d604-4b2b-9e66-21d1c10a307b";
+    const ID = 237404;
 
     public function __construct()
     {
@@ -29,6 +29,7 @@ class VoxImplantServer
         );
 
         $apiResult = $restApi->CallAPIGuzzle("GET", "https://api.voximplant.com/platform_api/AddUser/", $sendData);
+        dd($apiResult);
         $result = json_decode($apiResult);
 
         if ($result->{"result"} == 1)

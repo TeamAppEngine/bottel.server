@@ -1,14 +1,10 @@
 <?php namespace Repositories;
 
-use App\User;
+use App\Http\Libraries;
 
 class UserRepository {
 
-    private $UserModel = null;
-
-    public function __construct(User $user){
-        $this->UserModel = $user;
-    }
+    private $clusterPoint = null;
 
     /**
      * @param $uuid         string the uuid of the user
@@ -50,14 +46,12 @@ class UserRepository {
      */
     public function getUserBasedOnEmail($email){
         try {
-            $this->UserModel = $this->UserModel->where('email', $email)->first();
-            if($this->UserModel == null)
-                $this->UserModel = new User();
-            return $this->UserModel;
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            return $this->clusterPoint->getUserByEmail($email);
         }
         catch(\Exception $e){
-            $this->UserModel = new User();
-            return $this->UserModel;
+            return -1;
         }
     }
 
@@ -171,5 +165,16 @@ class UserRepository {
         /*$levelRepo = new LevelRepository(new \App\Level());
         $this->GroupModel->users()->attach($user);
         $this->UserModel->attach*/
+    }
+
+    public function insertUserInfo($userInfo)
+    {
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            $this->clusterPoint->insertUser($userInfo);
+        }
+        catch(\Exception $e){
+        }
     }
 }
