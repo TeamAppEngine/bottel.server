@@ -46,12 +46,12 @@ class VoxImplantServer
             "account_id" => self::ID,
             "api_key" => self::API_KEY,
             "user_name" => $userName,
-            "application_name" => "app"
+            "application_name" => "staging-bottel"
         );
 
         $apiResult = $restApi->CallAPIGuzzle("GET", "https://api.voximplant.com/platform_api/BindUser/", $sendData);
         $result = json_decode($apiResult);
-
+        dd($result);
         if ($result->{"result"} == 1)
             return true;
         else
