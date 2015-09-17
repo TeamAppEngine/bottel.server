@@ -29,7 +29,7 @@ class VoxImplantServer
         );
 
         $apiResult = $restApi->CallAPIGuzzle("GET", "https://api.voximplant.com/platform_api/AddUser/", $sendData);
-        dd($apiResult);
+
         $result = json_decode($apiResult);
 
         if ($result->{"result"} == 1)
