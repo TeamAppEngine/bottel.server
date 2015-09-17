@@ -29,7 +29,6 @@
   "autoload": {
     "classmap": [
       "database",
-      "app/Models",
       "app/Repositories",
       "app/Libraries"
     ],

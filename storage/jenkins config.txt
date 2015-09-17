@@ -1,0 +1,10 @@
+cd /var/www/
+sudo rm -r adraaf
+sudo git clone https://msadjad@github.com/TeamAppEngine/bottel.server.git adraaf
+sudo chown -R :www-data /var/www/adraaf
+sudo chmod -R 775 /var/www/adraaf/storage
+cd /var/www/adraaf/
+sudo composer install
+sudo cp .env.test .env
+sudo php artisan key:generate
+
