@@ -55,34 +55,21 @@ class UserRepository {
     /**
      * Update the presence of the user
      *
-     * @param $userInfo     array, the information of the user that wants to be updated
+     * @param userID string user id
      */
-    public function updateUserPresence($presenceId){
+    public function updateUserPresence($userID){
 
-        $presence = $this->UserModel->lastPresence();
-        $hasChanged = false;
-        if(isset($presence->pivot))
-        {
-            $fromTime = strtotime($presence->pivot->updated_at);
-            $toTime = strtotime(date("Y-m-d H:i:s"));
-            if(round(abs($toTime - $fromTime) / 60,2) < \Config::get('constants.presence'))
-            {
-                if($presence->id == $presenceId)
-                    $this->UserModel->presence()->updateExistingPivot($presence->id, [
-                        'updated_at' => date("Y-m-d H:i:s",$fromTime)
-                    ], true);
-                else
-                    $hasChanged = true;
-            }
-            else {
-                $hasChanged = true;
-            }
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            $this->clusterPoint->updatePresence(
+                [
+                    "uuid" => $userID,
+                    "last_activity" => date("Y-m-d H:i:s")
+                ]);
         }
-        else
-            $hasChanged = true;
-
-        if($hasChanged == true)
-            $this->UserModel->presence()->attach($presenceId);
+        catch(\Exception $e){
+        }
     }
 
     /**

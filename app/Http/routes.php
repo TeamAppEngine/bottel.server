@@ -29,6 +29,8 @@ Route::post('api/users/{uuid}', 'UsersController@update');
 
 Route::put('api/users/{uuid}', 'UsersController@update');
 
+Route::post('api/users/{uuid}/presence','UsersController@changePresence'); //New
+
 Route::get('api/users/login_session','UsersController@getSession');
 
 Route::get('api/users/{uuid}/image','UsersController@getImage');
@@ -36,8 +38,6 @@ Route::get('api/users/{uuid}/image','UsersController@getImage');
 Route::get('api/users/{uuid}/match','ConnectionController@getMatchV2'); //TODO
 
 Route::put ('api/users/{uuid}/presence','UsersController@changePresence'); //New
-
-Route::post('api/users/{uuid}/presence','UsersController@changePresence'); //New
 
 Route::get('api/users/{uuid}/{email}','UsersController@show');
 

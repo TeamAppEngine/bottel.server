@@ -155,21 +155,18 @@ class UsersController extends Controller
      * Update the specified resource in storage.
      *
      * @param  Request $request
-     * @param  \App\User the information of the user
+     * @param  $userID string the information of the user
      * @return Response
      */
-    public function changePresence(Request $request, User $user)
+    public function changePresence(Request $request, $userID)
     {
-        if ($user->toArray() == [])
+        $userRepo = new UserRepository();
+        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
+
+        if ($userIDCluster == -1)
             \App::abort(404, 'The API doesn\'t exist');
 
-        if ($request->get('presence')){
-            $presenceId = $request->get('presence');
-            $userRepo = new UserRepository($user);
-            $userRepo->updateUserPresence($presenceId);
-        } else {
-            \App::abort(400, 'The contract of the api was not met');
-        }
+        $userRepo->updateUserPresence($userID);
 
         return json_encode([]);
     }

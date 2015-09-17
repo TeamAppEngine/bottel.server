@@ -68,6 +68,14 @@ class ClusterPoint
         $cpsSimple->insertSingle($userInfo["uuid"], $userInfo);
     }
 
+    public function updatePresence($userInfo)
+    {
+        // Creating a CPS_Simple instance
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
+
+        $cpsSimple->partialReplaceSingle($userInfo["uuid"], $userInfo);
+    }
+
     public function updateUserInfo($userInfo, $languages)
     {
         // Creating a CPS_Simple instance
