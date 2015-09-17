@@ -28,43 +28,24 @@ Route::bind('email',function($email){
 //caa126a6-b0b8-440c-8512-9c506264bf61
 //Route::pattern('uuid','/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/');
 
-//--------------------   V1  ---------------------
 
-Route::post('api/v1/users', 'UsersController@store');
+Route::post('api/users', 'UsersController@storePlusVox'); //Changed
 
-Route::post('api/v1/users/{uuid}', 'UsersController@update');
+Route::post('api/users/{uuid}', 'UsersController@update');
 
-Route::put('api/v1/users/{uuid}', 'UsersController@update');
+Route::put('api/users/{uuid}', 'UsersController@update');
 
-Route::get('api/v1/users/login_session','UsersController@getSession');
+Route::get('api/users/login_session','UsersController@getSession');
 
-Route::get('api/v1/users/{uuid}/image','UsersController@getImage');
+Route::get('api/users/{uuid}/image','UsersController@getImage');
 
-Route::get('api/v1/users/{uuid}/token','ConnectionController@getToken');
+Route::get('api/users/{uuid}/match','ConnectionController@getMatchV2'); //TODO
 
-Route::get('api/v1/users/{uuid}/match','ConnectionController@getMatch');
+Route::put ('api/users/{uuid}/presence','UsersController@changePresence'); //New
 
-Route::get('api/v1/users/{uuid}/{email}','UsersController@show');
+Route::post('api/users/{uuid}/presence','UsersController@changePresence'); //New
 
-//--------------------   V2  ---------------------
-
-Route::post('api/v2/users', 'UsersController@storePlusVox'); //Changed
-
-Route::post('api/v2/users/{uuid}', 'UsersController@update');
-
-Route::put('api/v2/users/{uuid}', 'UsersController@update');
-
-Route::get('api/v2/users/login_session','UsersController@getSession');
-
-Route::get('api/v2/users/{uuid}/image','UsersController@getImage');
-
-Route::get('api/v2/users/{uuid}/match','ConnectionController@getMatchV2'); //TODO
-
-Route::put ('api/v2/users/{uuid}/presence','UsersController@changePresence'); //New
-
-Route::post('api/v2/users/{uuid}/presence','UsersController@changePresence'); //New
-
-Route::get('api/v2/users/{uuid}/{email}','UsersController@show');
+Route::get('api/users/{uuid}/{email}','UsersController@show');
 
 //--------------------- Default -------------------
 

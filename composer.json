@@ -17,7 +17,7 @@
     "ramsey/uuid": "~2.8",
     "guzzlehttp/guzzle": "*",
     "guzzlehttp/log-subscriber": "*",
-    "respoke/respoke": "*"
+    "clusterpoint/php-client-api": "3.0"
   },
   "require-dev": {
     "fzaninotto/faker": "~1.4",
