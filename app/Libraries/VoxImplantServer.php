@@ -51,7 +51,6 @@ class VoxImplantServer
 
         $apiResult = $restApi->CallAPIGuzzle("GET", "https://api.voximplant.com/platform_api/BindUser/", $sendData);
         $result = json_decode($apiResult);
-        dd($result);
         if ($result->{"result"} == 1)
             return true;
         else
