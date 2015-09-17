@@ -1,0 +1,10 @@
+/.idea
+/vendor
+/node_modules
+/storage/databaseseed/lendem.sql
+.env
+tests/_output/*
+tests/_output/*
+tests/_output/*
+tests/_output/*
+_ide_helper.php
