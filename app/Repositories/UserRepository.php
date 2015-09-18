@@ -82,6 +82,36 @@ class UserRepository {
         }
     }
 
+    public function logCall($userInfo){
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            $conversationInfo = [
+                "id"    => $userInfo["uuid"]."c".rand(1,1000000),
+                "owner_id" => $userInfo["uuid"],
+                "partner_id" => $userInfo["partner_id"]->__toString(),
+                "topic" => $userInfo["topic"],
+                "rate" => 0,
+                "duration" => 0,
+                "has_hang_up" => false,
+                "is_incoming" => false,
+                "x" => 35.753497,
+                "y" => 51.362583,
+                "type" => "conversation",
+                "country"   => "IR"
+            ];
+            $this->clusterPoint->postConversation($conversationInfo);
+
+            $conversationInfo["id"]    = $userInfo["partner_id"]->__toString()."c".rand(1,1000000);
+            $conversationInfo["owner_id"] = $userInfo["partner_id"]->__toString();
+            $conversationInfo["partner_id"] = $userInfo["uuid"];
+
+            $this->clusterPoint->postConversation($conversationInfo);
+        }
+        catch(\Exception $e){
+        }
+    }
+
     /**
      * Gets the role of the user based on Email
      * @param $member   string the member we want to get the role for

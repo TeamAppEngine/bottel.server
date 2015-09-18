@@ -48,6 +48,8 @@ Route::get('api/users/{user_id}/users/{partner_id}/availablity',
         ];
 });
 
+Route::post('api/users/{user_id}/users/{partner_id}/call','UsersController@logCall');
+
 Route::get('api/users/login_session','UsersController@getSession');
 
 Route::get('api/users/{uuid}/image','UsersController@getImage');

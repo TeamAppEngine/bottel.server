@@ -173,6 +173,42 @@ class UsersController extends Controller
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param  Request $request
+     * @param  $userID string the information of the user
+     * @param  $partnerID string the information of the partner
+     * @return Response
+     */
+    public function logCall(Request $request, $userID, $partnerID)
+    {
+        $userRepo = new UserRepository();
+        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
+
+        if ($userIDCluster == -1)
+            \App::abort(404, 'The API doesn\'t exist');
+
+        $partnerMainID = $userRepo->getUserBasedOnEmail($partnerID);
+
+        if ($partnerMainID == -1)
+            \App::abort(404, 'The API doesn\'t exist');
+
+        if ($request->get('topic')) {
+            $userInfo = [
+                "uuid" => $userID,
+                "partner_id" => $partnerMainID,
+                "topic" => $request->get('topic')];
+
+                $userRepo->logCall($userInfo);
+        } else
+            \App::abort(400, 'The contract of the api was not met');
+
+        return json_encode([
+            "result" => true
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
      * @param
      * @return Response
      */
