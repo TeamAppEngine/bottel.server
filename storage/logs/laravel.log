@@ -102,3 +102,6 @@ Stack trace:
 [2015-09-17 23:11:35] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method App\Http\Libraries\ClusterPoint::updatePresence()' in C:\xampp\htdocs\Bottel\app\Repositories\UserRepository.php:65
 Stack trace:
 #0 {main}  
+[2015-09-18 00:11:36] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method SimpleXMLElement::toString()' in C:\xampp\htdocs\Bottel\app\Libraries\ClusterPoint.php:96
+Stack trace:
+#0 {main}  

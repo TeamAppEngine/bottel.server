@@ -91,22 +91,59 @@ class ClusterPoint
         $documents = $cpsSimple->search($query, NULL, NULL, $list);
         $results = [];
 
-        dd($documents);
         foreach ($documents as $id => $document) {
             $tempResult = [];
-            $tempResult["x"] = $document->x;
-            $tempResult["y"] = $document->y;
-            $tempResult["description"] = $document->about;
+            $tempResult["x"] = $document->x->__toString();
+            $tempResult["y"] = $document->y->__toString();
+            $tempResult["description"] = $document->about->__toString();
+
+            //------------------------------------------------------------------
+            //Get User Conversations
+            $query = CPS_Term("conversation", 'type') . CPS_Term($id, "user_id");
+
+            $list = array(
+                'partner_id' => 'yes',
+                "duration" => 'yes',
+                "rate" => 'yes',
+                "country" => "yes",
+                "is_incoming" => "yes");
+
+
+
+            // Searching for documents
+            // note that only the query parameter is mandatory - the rest are optional
+            $searchRequest = new \CPS_SearchRequest($query, NULL, NULL, $list);
+
+            // Get the list of distinct values of "Country" field, ordered by field "Country" descending
+            $aggregate = "count(partner_id) ";
+            $searchRequest->setAggregate($aggregate);
+            $searchResponse = $this->cpsConn->sendRequest($searchRequest);
+            if ($searchResponse->getHits() > 0) {
+                foreach ($searchResponse->getDocuments() as $idAggregate => $documentAggregate) {
+                    echo 'Density: ' . $documentAggregate->Density . '<br />';
+                }
+                foreach ($searchResponse->getAggregate() as $qu => $aggr) {
+                    echo '<br />Aggregation query: ' . $qu . '<br />';
+                    foreach ($aggr as $key => $val) {
+                        echo 'Country: ' . $val->Country . '<br />';
+                    }
+                }
+            } else {
+                echo 'Nothing found.';
+            }
+            //--------------------------------------------------------------------
+
             $tempResult["calls_count"] = 0;
             $tempResult["receive_calls_count"] = 0;
             $tempResult["countries_to"] = [];
             $tempResult["rate"] = 0;
             $tempResult["minutes_spoken"] = 0;
             $tempResult["languages"] = [];
-            $tempResult["id"] = $document->email;
+            $tempResult["id"] = $document->email->__toString();
             $results[] = $tempResult;
         }
 
+        dd($results);
         return $results;
     }
 

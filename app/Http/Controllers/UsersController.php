@@ -69,17 +69,17 @@ class UsersController extends Controller
             $userInfo = [
                 "uuid" => \Rhumsaa\Uuid\Uuid::uuid4()->toString(),
                 "full_name" => "",
-                "x" => "",
-                "y" => "",
+                "x" => 35.908592,
+                "y" => 50.881902,
                 "email" => $email,
                 "password" => sha1($password),
                 "is_present" => "",
                 "created_at" => date("Y-m-d H:i:s"),
                 "updated_at" => date("Y-m-d H:i:s"),
                 "last_activity" => date("Y-m-d H:i:s"),
-                "languages" => [],
-                "country" => "",
-                "conversations" => []
+                //"languages" => [],
+                "country" => "IR",
+                //"conversations" => []
             ];
             $userRepo->insertUserInfo($userInfo);
             $voxImplantServer = new \App\Http\Libraries\VoxImplantServer();
