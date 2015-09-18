@@ -105,3 +105,9 @@ Stack trace:
 [2015-09-18 00:11:36] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method SimpleXMLElement::toString()' in C:\xampp\htdocs\Bottel\app\Libraries\ClusterPoint.php:96
 Stack trace:
 #0 {main}  
+[2015-09-18 03:14:01] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Class 'App\Http\Libraries\CPS_SearchRequest' not found' in C:\xampp\htdocs\Bottel\app\Libraries\ClusterPoint.php:150
+Stack trace:
+#0 {main}  
+[2015-09-18 03:23:24] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to undefined method SimpleXMLElement::__toArray()' in C:\xampp\htdocs\Bottel\app\Libraries\ClusterPoint.php:158
+Stack trace:
+#0 {main}  

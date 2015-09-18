@@ -79,7 +79,7 @@ class ClusterPoint
         // Creating a CPS_Simple instance
         $cpsSimple = new \CPS_Simple($this->cpsConn);
 
-        $query = CPS_Term($countryID, 'country');
+        $query = CPS_Term($countryID, 'country').CPS_Term('user','type');
 
         $list = array(
             'id' => 'yes',
@@ -90,60 +90,111 @@ class ClusterPoint
 
         $documents = $cpsSimple->search($query, NULL, NULL, $list);
         $results = [];
-
         foreach ($documents as $id => $document) {
             $tempResult = [];
             $tempResult["x"] = $document->x->__toString();
             $tempResult["y"] = $document->y->__toString();
             $tempResult["description"] = $document->about->__toString();
 
-            //------------------------------------------------------------------
+            //-----------------------------SUM CONVERSATION OUTGOING----------------
             //Get User Conversations
-            $query = CPS_Term("conversation", 'type') . CPS_Term($id, "user_id");
+            $query = CPS_Term("conversation", 'type') . CPS_Term($id, "owner_id");
 
             $list = array(
                 'partner_id' => 'yes',
                 "duration" => 'yes',
                 "rate" => 'yes',
-                "country" => "yes",
-                "is_incoming" => "yes");
-
-
+                "country" => "yes"
+            );
 
             // Searching for documents
             // note that only the query parameter is mandatory - the rest are optional
             $searchRequest = new \CPS_SearchRequest($query, NULL, NULL, $list);
-
-            // Get the list of distinct values of "Country" field, ordered by field "Country" descending
-            $aggregate = "count(partner_id) ";
-            $searchRequest->setAggregate($aggregate);
             $searchResponse = $this->cpsConn->sendRequest($searchRequest);
-            if ($searchResponse->getHits() > 0) {
-                foreach ($searchResponse->getDocuments() as $idAggregate => $documentAggregate) {
-                    echo 'Density: ' . $documentAggregate->Density . '<br />';
-                }
-                foreach ($searchResponse->getAggregate() as $qu => $aggr) {
-                    echo '<br />Aggregation query: ' . $qu . '<br />';
-                    foreach ($aggr as $key => $val) {
-                        echo 'Country: ' . $val->Country . '<br />';
-                    }
-                }
-            } else {
-                echo 'Nothing found.';
-            }
+            $tempResult["calls_count"] = $searchResponse->getHits();
+
+            //--------------------------------------------------------------------
+            //-----------------------------SUM CONVERSATION INCOMMING----------------
+            //Get User Conversations
+            $query = CPS_Term("conversation", 'type') . CPS_Term($id, "partner_id");
+
+            $list = array(
+                'partner_id' => 'yes',
+                "duration" => 'yes',
+                "rate" => 'yes',
+                "country" => "yes"
+            );
+
+            // Searching for documents
+            // note that only the query parameter is mandatory - the rest are optional
+            $searchRequest = new \CPS_SearchRequest($query, NULL, NULL, $list);
+            $searchResponse = $this->cpsConn->sendRequest($searchRequest);
+            $tempResult["receive_calls_count"] = $searchResponse->getHits();
             //--------------------------------------------------------------------
 
-            $tempResult["calls_count"] = 0;
-            $tempResult["receive_calls_count"] = 0;
-            $tempResult["countries_to"] = [];
-            $tempResult["rate"] = 0;
-            $tempResult["minutes_spoken"] = 0;
+            $tempResult["countries_to"] = ["IR"]; //TODO make it more general
+
+            //-----------------------------AVG OF RATE CONVERSATION ----------------
+            //Get User Conversations
+            $query = CPS_Term("conversation", 'type') . CPS_Term($id, "partner_id");
+
+            $list = array(
+                'partner_id' => 'yes',
+                "duration" => 'yes',
+                "rate" => 'yes',
+                "country" => "yes"
+            );
+
+            // Searching for documents
+            $searchRequest = new \CPS_SearchRequest($query, NULL, NULL, $list);
+
+// Get the list of distinct values of "Country" field, ordered by field "Country" descending
+            $aggregate = 'AVG(rate)';
+            $searchRequest->setAggregate($aggregate);
+
+            $searchResponse = $this->cpsConn->sendRequest($searchRequest);
+
+            $tempResult["rate"] = $searchResponse->getAggregate()["AVG(rate)"]->AVG_rate->__toString();
+            //--------------------------------------------------------------------
+            //-----------------------------AVG OF RATE CONVERSATION ----------------
+            //Get User Conversations
+            $query = CPS_Term("conversation", 'type') . CPS_Term($id, "partner_id");
+
+            $list = array(
+                'partner_id' => 'yes',
+                "duration" => 'yes',
+                "rate" => 'yes',
+                "country" => "yes"
+            );
+
+            // Searching for documents
+            $searchRequest = new \CPS_SearchRequest($query, NULL, NULL, $list);
+
+// Get the list of distinct values of "Country" field, ordered by field "Country" descending
+            $aggregate = 'SUM(duration)';
+            $searchRequest->setAggregate($aggregate);
+
+            $searchResponse = $this->cpsConn->sendRequest($searchRequest);
+
+            $tempResult["minutes_spoken"] = $searchResponse->getAggregate()["SUM(duration)"]->SUM_duration->__toString();
+            //--------------------------------------------------------------------
+
+            $query = CPS_Term($id, 'user_id').CPS_Term('language','type');
+
+            $list = array(
+                "language" => "yes");
+
+            $documentsLanguage = $cpsSimple->search($query, NULL, NULL, $list);
+
             $tempResult["languages"] = [];
+            foreach ($documentsLanguage as $idLanguage => $documentLanguage) {
+                    $tempResult[] = $documentLanguage;
+            }
+
             $tempResult["id"] = $document->email->__toString();
             $results[] = $tempResult;
         }
 
-        dd($results);
         return $results;
     }
 
