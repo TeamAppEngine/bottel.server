@@ -112,6 +112,29 @@ class UserRepository {
         }
     }
 
+    public function getIncomingCall($userInfo){
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            $conversationInfo = [
+                "owner_id" => $userInfo["uuid"],
+                "partner_id" => $userInfo["partner_id"]->__toString(),
+                "rate" => 0,
+                "duration" => 0,
+                "x" => 35.753497,
+                "y" => 51.362583,
+                "type" => "conversation",
+                "country"   => "IR"
+            ];
+
+            return $this->clusterPoint->getConversationDetails($conversationInfo);
+        }
+        catch(\Exception $e){
+        }
+
+        return -1;
+    }
+
     /**
      * Gets the role of the user based on Email
      * @param $member   string the member we want to get the role for

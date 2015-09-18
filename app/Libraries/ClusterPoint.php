@@ -38,6 +38,40 @@ class ClusterPoint
         //$this->cpsConn->setDebug(true);
     }
 
+    public function getConversationDetails($conversationInfo){
+        // Creating a CPS_Simple instance
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
+
+        $query = CPS_Term($conversationInfo["owner_id"], 'owner_id')
+            .CPS_Term($conversationInfo["partner_id"], 'partner_id')
+            .CPS_Term('conversation', 'type');
+
+        $list = array(
+            'id' => 'yes',
+            'topic' => 'yes'
+        );
+
+        $documents = $cpsSimple->search($query, NULL, NULL, $list);
+
+        $result = [];
+        foreach ($documents as $id => $document) {
+            $result["topic"] = $document->topic->__toString();
+        }
+
+        $query = CPS_Term($conversationInfo["partner_id"], 'user_id').CPS_Term('language','type');
+
+        $list = array("language" => "yes");
+
+        $documentsLanguage = $cpsSimple->search($query, NULL, NULL, $list);
+
+        $result["languages"] = [];
+        foreach ($documentsLanguage as $idLanguage => $documentLanguage) {
+            $result["languages"][] = $documentLanguage->language->__toString();
+        }
+
+        return $result;
+    }
+
     public function getUserByEmail($email)
     {
         // Creating a CPS_Simple instance

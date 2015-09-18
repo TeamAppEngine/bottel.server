@@ -98,57 +98,31 @@ class UsersController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  User $user
+     * @param  $userID
+     * @param  $partnerID
      * @return Response
      */
     //TODO: write unit tests
-    public function show(User $user, User $partner)
+    public function show($userID, $partnerID)
     {
+        $userRepo = new UserRepository();
+        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
 
-        if ($user->toArray() == [] || $partner->toArray() == [])
+        if ($userIDCluster == -1)
             \App::abort(404, 'The API doesn\'t exist');
-        $imageUrl = "";
-        $imageIndex = Libraries\ImageHelper::getTheCurrentImageIndex($partner);
-        if ($imageIndex != -1) //the user has an image
-        {
-            $imageUrl = \Request::url() . "/image";
-        }
 
-        $sessionRepo = new SessionRepository(new \App\Session());
-        $session = $sessionRepo->getSessionDetails($user, $partner);
-        $topicRepo = new TopicRepository(new \App\Topic());
-        $topic = $topicRepo->getTopicBasedOnId($session->topic_id);
-        $userRepo = new UserRepository(new \App\User());
-        $tempTopic = [];
-        $tempTopic['id'] = $topic->id;
-        $tempTopic['text'] = $topic->text;
-        $tempTopic['extra_question'] = $topic->extraQuestions()->FirstOrFail()->text;
-        $prompts = $topic->prompts;
-        $promptArray = [];
-        foreach($prompts as $prompt)
-        {
-            $tempPrompt['id'] = $prompt->id;
-            $tempPrompt['text'] = $prompt->text;
-            $promptArray[] = $tempPrompt;
-        }
-        $tempTopic['prompts'] = $promptArray;
+        $partnerMainID = $userRepo->getUserBasedOnEmail($partnerID);
 
-        $result = [
-            "partner" => [
-                "email" => $partner->email,
-                "first_name" => $partner->first_name,
-                "last_name" => $partner->last_name,
-                "birth_date" => $partner->date_of_birth,
-                "country_iso" => $partner->country->iso_code,
-                "profile_image" => $imageUrl,
-                "gender" => $partner->gender
-            ],
-            "role" => $userRepo->getUserRoleBasedOnEmail($partner)->role,
-            "topic" => $tempTopic
-        ];
+        if ($partnerMainID == -1)
+            \App::abort(404, 'The API doesn\'t exist');
 
-        return json_encode($result);
+        $userInfo = [
+            "uuid" => $userID,
+            "partner_id" => $partnerMainID];
 
+        $getInfo = $userRepo->getIncomingCall($userInfo);
+
+        return json_encode($getInfo);
     }
 
     /**

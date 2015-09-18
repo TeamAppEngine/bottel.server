@@ -50,6 +50,8 @@ Route::get('api/users/{user_id}/users/{partner_id}/availablity',
 
 Route::post('api/users/{user_id}/users/{partner_id}/call','UsersController@logCall');
 
+Route::get('api/users/{user_id}/users/{partner_id}/incoming_info','UsersController@show');
+
 Route::get('api/users/login_session','UsersController@getSession');
 
 Route::get('api/users/{uuid}/image','UsersController@getImage');
@@ -58,7 +60,7 @@ Route::get('api/users/{uuid}/match','ConnectionController@getMatchV2'); //TODO
 
 Route::put ('api/users/{uuid}/presence','UsersController@changePresence'); //New
 
-Route::get('api/users/{uuid}/{email}','UsersController@show');
+
 
 //--------------------- Default -------------------
 
