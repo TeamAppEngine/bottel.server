@@ -19,17 +19,23 @@ Route::bind('email',function($email){
     return $email;
 });
 
+Route::bind('country_id',function($country_id){
+    return $country_id;
+});
+
 //caa126a6-b0b8-440c-8512-9c506264bf61
 //Route::pattern('uuid','/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/');
 
 
-Route::post('api/users', 'UsersController@storePlusVox'); //Changed
+Route::post('api/users', 'UsersController@storePlusVox');
 
 Route::post('api/users/{uuid}', 'UsersController@update');
 
 Route::put('api/users/{uuid}', 'UsersController@update');
 
-Route::post('api/users/{uuid}/presence','UsersController@changePresence'); //New
+Route::post('api/users/{uuid}/presence','UsersController@changePresence');
+
+Route::get('api/countries/{country_id}/users/online','UsersController@getOnlineUsers');
 
 Route::get('api/users/login_session','UsersController@getSession');
 

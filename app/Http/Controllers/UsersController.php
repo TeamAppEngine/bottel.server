@@ -173,6 +173,18 @@ class UsersController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * @param
+     * @return Response
+     */
+    public function getOnlineUsers($countryID)
+    {
+        $userRepo = new UserRepository();
+        $onlineUsers = $userRepo->getOnlineUsersOfCountry($countryID);
+        return json_encode($onlineUsers);
+    }
+
+    /**
+     * Update the specified resource in storage.
      *
      * @param  Request $request
      * @param  userID String the information of the user

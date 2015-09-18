@@ -72,6 +72,16 @@ class UserRepository {
         }
     }
 
+    public function getOnlineUsersOfCountry($countryID){
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            return $this->clusterPoint->getOnlineUsers($countryID);
+        }
+        catch(\Exception $e){
+        }
+    }
+
     /**
      * Gets the role of the user based on Email
      * @param $member   string the member we want to get the role for

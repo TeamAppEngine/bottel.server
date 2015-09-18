@@ -40,7 +40,6 @@ class ClusterPoint
 
     public function getUserByEmail($email)
     {
-
         // Creating a CPS_Simple instance
         $cpsSimple = new \CPS_Simple($this->cpsConn);
 
@@ -76,12 +75,47 @@ class ClusterPoint
         $cpsSimple->partialReplaceSingle($userInfo["uuid"], $userInfo);
     }
 
+    public function getOnlineUsers($countryID){
+        // Creating a CPS_Simple instance
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
+
+        $query = CPS_Term($countryID, 'country');
+
+        $list = array(
+            'id' => 'yes',
+            "x" => 'yes',
+            "y" => 'yes',
+            "about" => "yes",
+            "email" => "yes");
+
+        $documents = $cpsSimple->search($query, NULL, NULL, $list);
+        $results = [];
+
+        dd($documents);
+        foreach ($documents as $id => $document) {
+            $tempResult = [];
+            $tempResult["x"] = $document->x;
+            $tempResult["y"] = $document->y;
+            $tempResult["description"] = $document->about;
+            $tempResult["calls_count"] = 0;
+            $tempResult["receive_calls_count"] = 0;
+            $tempResult["countries_to"] = [];
+            $tempResult["rate"] = 0;
+            $tempResult["minutes_spoken"] = 0;
+            $tempResult["languages"] = [];
+            $tempResult["id"] = $document->email;
+            $results[] = $tempResult;
+        }
+
+        return $results;
+    }
+
     public function updateUserInfo($userInfo, $languages)
     {
         // Creating a CPS_Simple instance
         $cpsSimple = new \CPS_Simple($this->cpsConn);
 
-        $cpsSimple->updateSingle($userInfo["uuid"], $userInfo);
+        $cpsSimple->partialReplaceSingle($userInfo["uuid"], $userInfo);
 
         //delete all the languages
         $query = CPS_Term("language", 'type') . CPS_Term($userInfo["uuid"], "user_id");
