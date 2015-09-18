@@ -70,6 +70,21 @@ class ClusterPoint
             $result["languages"][] = $documentLanguage->language->__toString();
         }
 
+        $query = CPS_Term($conversationInfo["partner_id"], 'id')
+            .CPS_Term('user','type');
+
+        $list = array(
+            'full_name' => 'yes',
+            'country' => 'yes'
+        );
+
+        $documents = $cpsSimple->search($query, NULL, NULL, $list);
+
+        foreach ($documents as $id => $document) {
+            $result["full_name"] = $document->full_name->__toString();
+            $result["country"] = $document->country->__toString();
+        }
+
         return $result;
     }
 
