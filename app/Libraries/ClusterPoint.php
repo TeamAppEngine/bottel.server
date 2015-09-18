@@ -188,7 +188,7 @@ class ClusterPoint
 
             $tempResult["languages"] = [];
             foreach ($documentsLanguage as $idLanguage => $documentLanguage) {
-                    $tempResult[] = $documentLanguage;
+                    $tempResult["languages"][] = $documentLanguage->language->__toString();
             }
 
             $tempResult["id"] = $document->email->__toString();
