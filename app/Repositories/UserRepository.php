@@ -107,6 +107,7 @@ class UserRepository {
             $conversationInfo["partner_id"] = $userInfo["uuid"];
 
             $this->clusterPoint->postConversation($conversationInfo);
+            return $this->clusterPoint->getPartnerInfo($conversationInfo["owner_id"]);
         }
         catch(\Exception $e){
         }

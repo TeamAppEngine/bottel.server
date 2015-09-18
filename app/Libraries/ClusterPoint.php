@@ -88,6 +88,31 @@ class ClusterPoint
         return $result;
     }
 
+    public function getPartnerInfo($userID){
+
+        // Creating a CPS_Simple instance
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
+
+        $query = CPS_Term($userID, 'id')
+            .CPS_Term('user','type');
+
+        $list = array(
+            'full_name' => 'yes',
+            'country' => 'yes'
+        );
+
+        $documents = $cpsSimple->search($query, NULL, NULL, $list);
+
+        $result = [];
+
+        foreach ($documents as $id => $document) {
+            $result["full_name"] = $document->full_name->__toString();
+            $result["country"] = $document->country->__toString();
+        }
+
+        return $result;
+    }
+
     public function getUserByEmail($email)
     {
         // Creating a CPS_Simple instance

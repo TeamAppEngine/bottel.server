@@ -83,7 +83,7 @@ class UsersController extends Controller
             ];
             $userRepo->insertUserInfo($userInfo);
             $voxImplantServer = new \App\Http\Libraries\VoxImplantServer();
-            if(!$voxImplantServer->createUser(str_replace('@','_',$email),$email))
+            if (!$voxImplantServer->createUser(str_replace('@', '_', $email), $email))
                 \App::abort(500, 'The voximplant server didn\'t reply');
         } else {
             \App::abort(409, 'The email is already in use');
@@ -166,19 +166,18 @@ class UsersController extends Controller
         if ($partnerMainID == -1)
             \App::abort(404, 'The API doesn\'t exist');
 
+        $result = [];
         if ($request->get('topic')) {
+
             $userInfo = [
                 "uuid" => $userID,
                 "partner_id" => $partnerMainID,
                 "topic" => $request->get('topic')];
-
-                $userRepo->logCall($userInfo);
+            $result = $userRepo->logCall($userInfo);
         } else
             \App::abort(400, 'The contract of the api was not met');
 
-        return json_encode([
-            "result" => true
-        ]);
+        return json_encode($result);
     }
 
     /**
@@ -220,7 +219,7 @@ class UsersController extends Controller
 
             $languages = json_decode($request->get('languages'));
 
-            $userRepo->updateUserInfo($userInfo,$languages);
+            $userRepo->updateUserInfo($userInfo, $languages);
         } else {
             \App::abort(400, 'The contract of the api was not met');
         }
