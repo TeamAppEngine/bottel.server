@@ -54,8 +54,9 @@ class ClusterPoint
         $documents = $cpsSimple->search($query, NULL, NULL, $list);
 
         $result = [];
+
         foreach ($documents as $id => $document) {
-            $result["topic"] = $document->topic->__toString();
+            $result["topic"] = $document->topic->__toString(); //TODO solve multiple issue
         }
 
         $query = CPS_Term($conversationInfo["partner_id"], 'user_id').CPS_Term('language','type');
