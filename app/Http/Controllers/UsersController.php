@@ -341,6 +341,10 @@ class UsersController extends Controller
             $temp["updated_at"] = date("Y-m-d H:i:s");
             $temp["last_activtiy"] = date("Y-m-d H:i:s");
             $temp["country"] = $countries->{"iso-code"};
+            $temp["languages"] = [
+                "langauge" => "English"
+            ];
+            $temp["conversations"] = "";
             $temp["x"] = $countries->x;
             $temp["y"] = $countries->y;
             $fileArray[$key] = $temp;

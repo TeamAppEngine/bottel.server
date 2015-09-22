@@ -8,6 +8,8 @@
 
 namespace App\Http\Libraries;
 
+use League\Flysystem\Exception;
+
 class ClusterPoint
 {
 
@@ -15,6 +17,25 @@ class ClusterPoint
 
     public function __construct()
     {
+        $connectionStrings = array(
+            'tcp://cloud-eu-0.clusterpoint.com:9007',
+            'tcp://cloud-eu-1.clusterpoint.com:9007',
+            'tcp://cloud-eu-2.clusterpoint.com:9007',
+            'tcp://cloud-eu-3.clusterpoint.com:9007',
+        );
+        $this->cpsConn = new \CPS_Connection(new \CPS_LoadBalancer($connectionStrings),
+            getenv('DB_NAME'),
+            getenv('DB_USERNAME'),
+            getenv('DB_PASSWORD'),
+            'document',
+            '//document/id',
+            array('account' => 1950));
+//$cpsConn->setDebug(true);
+
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
+        $cpsSimple->lookupSingle("fd5a7de5-0934-422c-9ece-60aa67994150");
+        dd($cpsSimple);
+
         // Connection hubs
         $connectionStrings = array(
             'tcp://cloud-eu-0.clusterpoint.com:9007',
@@ -38,6 +59,7 @@ class ClusterPoint
         //$this->cpsConn->setDebug(true);
     }
 
+    //TODO
     public function getConversationDetails($conversationInfo){
         // Creating a CPS_Simple instance
         $cpsSimple = new \CPS_Simple($this->cpsConn);
@@ -88,6 +110,7 @@ class ClusterPoint
         return $result;
     }
 
+    //TODO
     public function getPartnerInfo($userID){
 
         // Creating a CPS_Simple instance
@@ -101,8 +124,9 @@ class ClusterPoint
             'country' => 'yes'
         );
 
-        $documents = $cpsSimple->search($query, NULL, NULL, $list);
+        $documents = $cpsSimple->lookupSingle($userID, $list);
 
+        dd($documents);
         $result = [];
 
         foreach ($documents as $id => $document) {
@@ -322,7 +346,6 @@ class ClusterPoint
 
     public function getUserByID($id)
     {
-
         // Creating a CPS_Simple instance
         $cpsSimple = new \CPS_Simple($this->cpsConn);
 
@@ -332,8 +355,15 @@ class ClusterPoint
             'id' => 'yes'
         );
 
-        $documents = $cpsSimple->search($query, NULL, NULL, $list);
-
+        //$documents =
+        try {
+            dd($cpsSimple->lookupSingle($query, $list));
+        }
+        catch(Exception $e)
+        {
+            dd($e->getMessage());
+        }
+        dd("salam");
         foreach ($documents as $id => $document) {
             return $document->id;
         }
