@@ -796,3 +796,15 @@ Stack trace:
 #46 C:\xampp\htdocs\Bottel\public\index.php(54): Illuminate\Foundation\Http\Kernel->handle(Object(Illuminate\Http\Request))
 #47 C:\xampp\htdocs\Bottel\server.php(21): require_once('C:\\xampp\\htdocs...')
 #48 {main}  
+[2015-09-22 14:51:43] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'syntax error, unexpected ')'' in C:\xampp\htdocs\Bottel\app\Libraries\ClusterPoint.php:342
+Stack trace:
+#0 {main}  
+[2015-09-22 15:07:39] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Class 'APp' not found' in C:\xampp\htdocs\Bottel\app\Http\Controllers\UsersController.php:164
+Stack trace:
+#0 {main}  
+[2015-09-22 16:02:34] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'syntax error, unexpected '}'' in C:\xampp\htdocs\Bottel\app\Repositories\UserRepository.php:96
+Stack trace:
+#0 {main}  
+[2015-09-22 16:04:05] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'syntax error, unexpected '}'' in C:\xampp\htdocs\Bottel\app\Repositories\UserRepository.php:96
+Stack trace:
+#0 {main}  

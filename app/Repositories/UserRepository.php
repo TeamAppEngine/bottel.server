@@ -72,42 +72,35 @@ class UserRepository {
         }
     }
 
+    /**
+     * Logs that the both users have been in a conversation
+     *
+     * @param $conversationInfo Array the information of the conversation
+     * @return int
+     */
+    public function logCall($conversationInfo){
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+
+            $partner = $conversationInfo["partner"];
+            $user = $conversationInfo["user"];
+            $this->clusterPoint->logConversation($conversationInfo);
+            $conversationInfo["partner"] = $user;
+            $conversationInfo["user"] = $partner;
+            $this->clusterPoint->logConversation($conversationInfo);
+            return 1;
+        }
+        catch(\Exception $e){
+            return $e->getMessage();
+        }
+    }
+
     public function getOnlineUsersOfCountry($countryID){
         try {
             if($this->clusterPoint == null)
                 $this->clusterPoint = new Libraries\ClusterPoint();
             return $this->clusterPoint->getOnlineUsers($countryID);
-        }
-        catch(\Exception $e){
-        }
-    }
-
-    public function logCall($userInfo){
-        try {
-            if($this->clusterPoint == null)
-                $this->clusterPoint = new Libraries\ClusterPoint();
-            $conversationInfo = [
-                "id"    => $userInfo["uuid"]."c".rand(1,1000000),
-                "owner_id" => $userInfo["uuid"],
-                "partner_id" => $userInfo["partner_id"]->__toString(),
-                "topic" => $userInfo["topic"],
-                "rate" => 0,
-                "duration" => 0,
-                "has_hang_up" => false,
-                "is_incoming" => false,
-                "x" => 35.753497,
-                "y" => 51.362583,
-                "type" => "conversation",
-                "country"   => "IR"
-            ];
-            $this->clusterPoint->postConversation($conversationInfo);
-
-            $conversationInfo["id"]    = $userInfo["partner_id"]->__toString()."c".rand(1,1000000);
-            $conversationInfo["owner_id"] = $userInfo["partner_id"]->__toString();
-            $conversationInfo["partner_id"] = $userInfo["uuid"];
-
-            $this->clusterPoint->postConversation($conversationInfo);
-            return $this->clusterPoint->getPartnerInfo($conversationInfo["owner_id"]);
         }
         catch(\Exception $e){
         }

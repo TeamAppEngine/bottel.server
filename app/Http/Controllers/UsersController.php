@@ -156,24 +156,27 @@ class UsersController extends Controller
     public function logCall(Request $request, $userID, $partnerID)
     {
         $userRepo = new UserRepository();
-        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
+        $user = $userRepo->getUserBasedOnUuid($userID);
 
-        if ($userIDCluster == -1)
+        if ($user == -1)
             \App::abort(404, 'The API doesn\'t exist');
+        else if($user == -2)
+            \App::abort(500, 'cluster point didn\'t reply');
 
-        $partnerMainID = $userRepo->getUserBasedOnEmail($partnerID);
+        $partner = $userRepo->getUserBasedOnEmail($partnerID);
 
-        if ($partnerMainID == -1)
+        if ($partner == -1)
             \App::abort(404, 'The API doesn\'t exist');
+        else if($partner == -2)
+            \App::abort(500, 'cluster point didn\'t reply');
 
         $result = [];
         if ($request->get('topic')) {
-
-            $userInfo = [
-                "uuid" => $userID,
-                "partner_id" => $partnerMainID,
+            $conversationInfo = [
+                "user" => $user,
+                "partner" => $partner,
                 "topic" => $request->get('topic')];
-            $result = $userRepo->logCall($userInfo);
+            $result = $userRepo->logCall($conversationInfo);
         } else
             \App::abort(400, 'The contract of the api was not met');
 
@@ -339,10 +342,11 @@ class UsersController extends Controller
             $temp["about"] ="I have a bachelors and I love Sports";
             $temp["created_at"] = date("Y-m-d H:i:s");
             $temp["updated_at"] = date("Y-m-d H:i:s");
-            $temp["last_activtiy"] = date("Y-m-d H:i:s");
+            $temp["last_activity"] = date("Y-m-d H:i:s");
             $temp["country"] = $countries->{"iso-code"};
+            $temp["type"] = "user";
             $temp["languages"] = [
-                "langauge" => "English"
+                "language" => "English"
             ];
             $temp["conversations"] = "";
             $temp["x"] = $countries->x;
@@ -352,44 +356,12 @@ class UsersController extends Controller
 
         $xml = new \SimpleXMLElement('<users/>');
 
-        $this->array_to_xml($fileArray, $xml);
+        Libraries\Converter::Array2XML($fileArray, $xml);
         //dd($xml);
         return \Response::make($xml->asXML(), '200')->header('Content-Type', 'text/xml');
         // Verify Validate JSON?
 
         // Your other Stuff
 
-    }
-
-    function array_to_xml( $data, &$xml_data ) {
-        foreach( $data as $key => $value ) {
-            if( is_array($value) ) {
-                if( is_numeric($key) ){
-                    $key = 'user'; //dealing with <0/>..<n/> issues
-                }
-                $subnode = $xml_data->addChild($key);
-                $this->array_to_xml($value, $subnode);
-            } else {
-                $xml_data->addChild("$key",htmlspecialchars("$value"));
-            }
-        }
-    }
-
-    public function macroXml(array $vars, $xml = null)
-    {
-        if (is_null($xml)) {
-            $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><users/>');
-        }
-        foreach ($vars as $key => $value) {
-            if (is_array($value)) {
-                return $this->macroXml($value, $xml->addChild($key));
-            } else {
-                $xml->addChild($key, $value);
-            }
-        }
-        if (empty($header)) {
-            $header['Content-Type'] = 'application/xml';
-        }
-        return $xml->asXML();
     }
 }

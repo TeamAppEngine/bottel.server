@@ -14,28 +14,13 @@ class ClusterPoint
 {
 
     private $cpsConn;
+    private $cpsSimple;
 
+    /**
+     * Creates a connection to cluster point
+     */
     public function __construct()
     {
-        $connectionStrings = array(
-            'tcp://cloud-eu-0.clusterpoint.com:9007',
-            'tcp://cloud-eu-1.clusterpoint.com:9007',
-            'tcp://cloud-eu-2.clusterpoint.com:9007',
-            'tcp://cloud-eu-3.clusterpoint.com:9007',
-        );
-        $this->cpsConn = new \CPS_Connection(new \CPS_LoadBalancer($connectionStrings),
-            getenv('DB_NAME'),
-            getenv('DB_USERNAME'),
-            getenv('DB_PASSWORD'),
-            'document',
-            '//document/id',
-            array('account' => 1950));
-//$cpsConn->setDebug(true);
-
-        $cpsSimple = new \CPS_Simple($this->cpsConn);
-        $cpsSimple->lookupSingle("fd5a7de5-0934-422c-9ece-60aa67994150");
-        dd($cpsSimple);
-
         // Connection hubs
         $connectionStrings = array(
             'tcp://cloud-eu-0.clusterpoint.com:9007',
@@ -57,6 +42,104 @@ class ClusterPoint
 
         // Debug
         //$this->cpsConn->setDebug(true);
+
+        // Creating a CPS_Simple instance
+        $this->cpsSimple = new \CPS_Simple($this->cpsConn);
+    }
+
+    /**
+     * Gets the user based on it's ID
+     *
+     * @param $id integer the id of the user
+     * @return mixed the User that is in the database
+     *          -1 the user doesn't exist
+     *          -2 connection problem
+     */
+    public function getUserByID($id)
+    {
+        $list = array(
+            'id' => 'yes'
+        );
+
+        $document = null;
+
+        try {
+            $document = $this->cpsSimple->lookupSingle($id, $list);
+        }
+        catch(Exception $e)
+        {
+            return -2;
+        }
+
+        if($document != null)
+            return Converter::XML2Array($document);
+        else
+            return -1;
+    }
+
+    /**
+     * Gets the user based on it's ID
+     *
+     * @param $email string the email of the user
+     * @return mixed the User that is in the database
+     *          -1 the user doesn't exist
+     *          -2 connection problem
+     */
+    public function getUserByEmail($email)
+    {
+        // Creating a CPS_Simple instance
+        $cpsSimple = new \CPS_Simple($this->cpsConn);
+
+        $query = CPS_Term($email, 'email');
+
+        $list = array(
+            'id' => 'yes'
+        );
+
+        try{
+            $documents = $cpsSimple->search($query, NULL, NULL, $list);
+        }
+        catch(Exception $e)
+        {
+            return -2;
+        }
+
+        foreach ($documents as $id => $document) {
+            return Converter::XML2Array($document);
+        }
+
+        return -1;
+    }
+
+    /**
+     * Logs that the user has had a conversation
+     *
+     * @param $conversationInfo Array the information of the conversation
+     * @return int the status of the conversation
+     */
+    //TOdO two different states for incoming
+    public function logConversation($conversationInfo){
+        try{
+            $xml = new \SimpleXMLElement('<user/>');
+            $conversationArray = [
+                "rate" => 0,
+                "duration" => 0,
+                "partner_id" => $conversationInfo["partner"]["id"],
+                "has_hang_up" => false,
+                "is_incoming" => false,
+                "created_at" => date("Y-m-d H:i:s"),
+                "topic" => $conversationInfo["topic"]
+            ];
+            Converter::Array2XML($conversationArray,$xml);
+            $conversationInfo["user"]["conversations"]["conversation"][] = $xml;
+        }
+        catch(\Exception $e)
+        {
+            return -2;
+        }
+
+        $this->cpsSimple->updateSingle($conversationInfo["user"]["id"], $conversationInfo["user"]);
+        return 0;
     }
 
     //TODO
@@ -123,7 +206,7 @@ class ClusterPoint
             'full_name' => 'yes',
             'country' => 'yes'
         );
-
+        dd($userID);
         $documents = $cpsSimple->lookupSingle($userID, $list);
 
         dd($documents);
@@ -135,26 +218,6 @@ class ClusterPoint
         }
 
         return $result;
-    }
-
-    public function getUserByEmail($email)
-    {
-        // Creating a CPS_Simple instance
-        $cpsSimple = new \CPS_Simple($this->cpsConn);
-
-        $query = CPS_Term($email, 'email');
-
-        $list = array(
-            'id' => 'yes'
-        );
-
-        $documents = $cpsSimple->search($query, NULL, NULL, $list);
-
-        foreach ($documents as $id => $document) {
-            return $document->id;
-        }
-
-        return -1;
     }
 
     public function insertUser($userInfo)
@@ -297,14 +360,6 @@ class ClusterPoint
         return $results;
     }
 
-    public function postConversation($conversationInfo){
-
-        // Creating a CPS_Simple instance
-        $cpsSimple = new \CPS_Simple($this->cpsConn);
-
-        $cpsSimple->insertSingle($conversationInfo["id"], $conversationInfo);
-    }
-
     public function updateUserInfo($userInfo, $languages)
     {
         // Creating a CPS_Simple instance
@@ -342,32 +397,5 @@ class ClusterPoint
             ];
         }
         $cpsSimple->insertMultiple($insertMultipleLanguages);
-    }
-
-    public function getUserByID($id)
-    {
-        // Creating a CPS_Simple instance
-        $cpsSimple = new \CPS_Simple($this->cpsConn);
-
-        $query = CPS_Term($id, 'id');
-
-        $list = array(
-            'id' => 'yes'
-        );
-
-        //$documents =
-        try {
-            dd($cpsSimple->lookupSingle($query, $list));
-        }
-        catch(Exception $e)
-        {
-            dd($e->getMessage());
-        }
-        dd("salam");
-        foreach ($documents as $id => $document) {
-            return $document->id;
-        }
-
-        return -1;
     }
 }
