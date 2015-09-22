@@ -320,5 +320,72 @@ class UsersController extends Controller
         return json_encode($userInfo);
     }
 
+    public function generatePin() {
+        $path = storage_path() . "/data/countries.json"; // ie: /var/www/laravel/app/storage/json/filename.json
 
+        if (!\File::exists($path)) {
+            throw new \Exception("Invalid File");
+        }
+
+        $file = \File::get($path); // string
+        $fileArray = json_decode($file);
+        foreach($fileArray as $key => $countries){
+            $temp = [];
+            $temp["uuid"] = \Rhumsaa\Uuid\Uuid::uuid4()->toString();
+            $temp["full_name"] = "Arsalan";
+            $temp["email"] = "a.yarveisi@gmail.com";
+            $temp["password"] = 12345678;
+            $temp["is_present"] = true;
+            $temp["about"] ="I have a bachelors and I love Sports";
+            $temp["created_at"] = date("Y-m-d H:i:s");
+            $temp["updated_at"] = date("Y-m-d H:i:s");
+            $temp["last_activtiy"] = date("Y-m-d H:i:s");
+            $temp["country"] = $countries->{"iso-code"};
+            $temp["x"] = $countries->x;
+            $temp["y"] = $countries->y;
+            $fileArray[$key] = $temp;
+        }
+
+        $xml = new \SimpleXMLElement('<users/>');
+
+        $this->array_to_xml($fileArray, $xml);
+        //dd($xml);
+        return \Response::make($xml->asXML(), '200')->header('Content-Type', 'text/xml');
+        // Verify Validate JSON?
+
+        // Your other Stuff
+
+    }
+
+    function array_to_xml( $data, &$xml_data ) {
+        foreach( $data as $key => $value ) {
+            if( is_array($value) ) {
+                if( is_numeric($key) ){
+                    $key = 'user'; //dealing with <0/>..<n/> issues
+                }
+                $subnode = $xml_data->addChild($key);
+                $this->array_to_xml($value, $subnode);
+            } else {
+                $xml_data->addChild("$key",htmlspecialchars("$value"));
+            }
+        }
+    }
+
+    public function macroXml(array $vars, $xml = null)
+    {
+        if (is_null($xml)) {
+            $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><users/>');
+        }
+        foreach ($vars as $key => $value) {
+            if (is_array($value)) {
+                return $this->macroXml($value, $xml->addChild($key));
+            } else {
+                $xml->addChild($key, $value);
+            }
+        }
+        if (empty($header)) {
+            $header['Content-Type'] = 'application/xml';
+        }
+        return $xml->asXML();
+    }
 }

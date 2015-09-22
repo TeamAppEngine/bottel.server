@@ -60,6 +60,8 @@ Route::get('api/users/{uuid}/match','ConnectionController@getMatchV2'); //TODO
 
 Route::put ('api/users/{uuid}/presence','UsersController@changePresence'); //New
 
+Route::get ('api/generate','UsersController@generatePin'); //New
+
 
 
 //--------------------- Default -------------------
