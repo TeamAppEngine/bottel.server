@@ -85,10 +85,13 @@ class UserRepository {
 
             $partner = $conversationInfo["partner"];
             $user = $conversationInfo["user"];
-            $this->clusterPoint->logConversation($conversationInfo);
+            if($this->clusterPoint->logConversation($conversationInfo,0) == -2){
+                dd("ridim");
+            }
             $conversationInfo["partner"] = $user;
             $conversationInfo["user"] = $partner;
-            $this->clusterPoint->logConversation($conversationInfo);
+            if($this->clusterPoint->logConversation($conversationInfo,1) == -2)
+                dd("ridim2");
             return 1;
         }
         catch(\Exception $e){

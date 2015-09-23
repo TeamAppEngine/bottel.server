@@ -115,30 +115,47 @@ class ClusterPoint
      * Logs that the user has had a conversation
      *
      * @param $conversationInfo Array the information of the conversation
+     * @param $incomingCall boolean indicating if it was an incoming or outgoing call
      * @return int the status of the conversation
      */
     //TOdO two different states for incoming
-    public function logConversation($conversationInfo){
+    public function logConversation($conversationInfo, $incomingCall){
         try{
             $xml = new \SimpleXMLElement('<user/>');
             $conversationArray = [
                 "rate" => 0,
                 "duration" => 0,
                 "partner_id" => $conversationInfo["partner"]["id"],
-                "has_hang_up" => false,
-                "is_incoming" => false,
+                "has_hang_up" => 0,
+                "is_incoming" => $incomingCall,
                 "created_at" => date("Y-m-d H:i:s"),
                 "topic" => $conversationInfo["topic"]
             ];
             Converter::Array2XML($conversationArray,$xml);
-            $conversationInfo["user"]["conversations"]["conversation"][] = $xml;
+
+            if(isset($conversationInfo["user"]["conversations"]["conversation"])) {
+                if(gettype($conversationInfo["user"]["conversations"]["conversation"]) == "array") {
+                    $conversationInfo["user"]["conversations"]["conversation"][
+                    count($conversationInfo["user"]["conversations"]["conversation"])] = $xml;
+                }
+                else{
+                    $conversation = $conversationInfo["user"]["conversations"]["conversation"];
+                    $conversationInfo["user"]["conversations"]["conversation"] = [];
+                    $conversationInfo["user"]["conversations"]["conversation"][0] = $conversation;
+                    $conversationInfo["user"]["conversations"]["conversation"][1] = $xml;
+                }
+            }
+            else {
+                $conversationInfo["user"]["conversations"] = ["conversation" => [$xml]];
+            }
+
+            $this->cpsSimple->updateSingle($conversationInfo["user"]["id"], $conversationInfo["user"]);
         }
         catch(\Exception $e)
         {
             return -2;
         }
 
-        $this->cpsSimple->updateSingle($conversationInfo["user"]["id"], $conversationInfo["user"]);
         return 0;
     }
 
