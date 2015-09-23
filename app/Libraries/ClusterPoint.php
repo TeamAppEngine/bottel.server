@@ -112,13 +112,31 @@ class ClusterPoint
     }
 
     /**
+     * Insert a user enter the database
+     *
+     * @param $userInfo
+     * @return int the status of the query
+     *                              -2 exception
+     *                               0 done
+     */
+    public function insertUser($userInfo)
+    {
+        try {
+            $this->cpsSimple->insertSingle($userInfo["uuid"], $userInfo);
+            return 0;
+        }
+        catch(\Exception $e){
+            return -2;
+        }
+    }
+
+    /**
      * Logs that the user has had a conversation
      *
      * @param $conversationInfo Array the information of the conversation
      * @param $incomingCall boolean indicating if it was an incoming or outgoing call
      * @return int the status of the conversation
      */
-    //TOdO two different states for incoming
     public function logConversation($conversationInfo, $incomingCall){
         try{
             $xml = new \SimpleXMLElement('<user/>');
@@ -235,15 +253,6 @@ class ClusterPoint
         }
 
         return $result;
-    }
-
-    public function insertUser($userInfo)
-    {
-
-        // Creating a CPS_Simple instance
-        $cpsSimple = new \CPS_Simple($this->cpsConn);
-
-        $cpsSimple->insertSingle($userInfo["uuid"], $userInfo);
     }
 
     public function updatePresence($userInfo)

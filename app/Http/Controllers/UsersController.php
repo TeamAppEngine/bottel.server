@@ -22,26 +22,14 @@ class UsersController extends Controller
 {
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-
-        \App::abort(404, 'function not implemented');
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  Request $request
-     * @return Response
+     * @return \Response
      */
     //TODO: must write tests
     public function storePlusVox(Request $request)
     {
-
         //get the email and password from the input
         $email = "";
         $password = "";
@@ -59,13 +47,13 @@ class UsersController extends Controller
 
         //get the user based on the email
         $userRepo = new UserRepository();
-        $userID = $userRepo->getUserBasedOnEmail($email);
+        $user = $userRepo->getUserBasedOnEmail($email);
 
         //fill the information of the user
         //if the user didn't exist
         $userInfo = [];
 
-        if ($userID == -1) {
+        if ($user == -1) {
             $userInfo = [
                 "uuid" => \Rhumsaa\Uuid\Uuid::uuid4()->toString(),
                 "full_name" => "",
@@ -77,9 +65,9 @@ class UsersController extends Controller
                 "created_at" => date("Y-m-d H:i:s"),
                 "updated_at" => date("Y-m-d H:i:s"),
                 "last_activity" => date("Y-m-d H:i:s"),
-                //"languages" => [],
+                "languages" => [],
                 "country" => "IR",
-                //"conversations" => []
+                "conversations" => []
             ];
             $userRepo->insertUserInfo($userInfo);
             $voxImplantServer = new \App\Http\Libraries\VoxImplantServer();

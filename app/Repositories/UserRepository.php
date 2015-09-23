@@ -37,6 +37,28 @@ class UserRepository {
     }
 
     /**
+     * Insert the newly created user in the database
+     *
+     * @param $userInfo
+     * @return int if the user is inserted return 0
+     *                              else   return -1
+     */
+    public function insertUserInfo($userInfo)
+    {
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            if($this->clusterPoint->insertUser($userInfo) == 0)
+                return 0;
+            else
+                return -1;
+        }
+        catch(\Exception $e){
+            return -1;
+        }
+    }
+
+    /**
      * Updates the information of the user
      *
      * @param $userInfo     array, the information of the user that wants to be updated
@@ -158,16 +180,5 @@ class UserRepository {
         }
         $this->UserModel->role = $resultLevel;
         return $this->UserModel;
-    }
-
-    public function insertUserInfo($userInfo)
-    {
-        try {
-            if($this->clusterPoint == null)
-                $this->clusterPoint = new Libraries\ClusterPoint();
-            $this->clusterPoint->insertUser($userInfo);
-        }
-        catch(\Exception $e){
-        }
     }
 }
