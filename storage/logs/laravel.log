@@ -860,3 +860,9 @@ Stack trace:
 #47 C:\xampp\htdocs\Bottel\public\index.php(54): Illuminate\Foundation\Http\Kernel->handle(Object(Illuminate\Http\Request))
 #48 C:\xampp\htdocs\Bottel\server.php(21): require_once('C:\\xampp\\htdocs...')
 #49 {main}  
+[2015-09-25 12:04:27] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to a member function getName() on string' in C:\xampp\htdocs\Bottel\app\Libraries\Converter.php:19
+Stack trace:
+#0 {main}  
+[2015-09-25 12:04:31] local.ERROR: exception 'Symfony\Component\Debug\Exception\FatalErrorException' with message 'Call to a member function getName() on string' in C:\xampp\htdocs\Bottel\app\Libraries\Converter.php:19
+Stack trace:
+#0 {main}  

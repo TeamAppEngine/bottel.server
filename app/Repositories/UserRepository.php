@@ -59,42 +59,6 @@ class UserRepository {
     }
 
     /**
-     * Updates the information of the user
-     *
-     * @param $userInfo     array, the information of the user that wants to be updated
-     * @param $languages    array, the list of languages
-     */
-    public function updateUserInfo(array $userInfo,$languages){
-        try {
-            if($this->clusterPoint == null)
-                $this->clusterPoint = new Libraries\ClusterPoint();
-            $this->clusterPoint->updateUserInfo($userInfo,$languages);
-        }
-        catch(\Exception $e){
-        }
-    }
-
-    /**
-     * Update the presence of the user
-     *
-     * @param userID string user id
-     */
-    public function updateUserPresence($userID){
-
-        try {
-            if($this->clusterPoint == null)
-                $this->clusterPoint = new Libraries\ClusterPoint();
-            $this->clusterPoint->updatePresence(
-                [
-                    "uuid" => $userID,
-                    "last_activity" => date("Y-m-d H:i:s")
-                ]);
-        }
-        catch(\Exception $e){
-        }
-    }
-
-    /**
      * Logs that the both users have been in a conversation
      *
      * @param $conversationInfo Array the information of the conversation
@@ -107,78 +71,102 @@ class UserRepository {
 
             $partner = $conversationInfo["partner"];
             $user = $conversationInfo["user"];
-            if($this->clusterPoint->logConversation($conversationInfo,0) == -2){
-                dd("ridim");
-            }
+            if($this->clusterPoint->logConversation($conversationInfo,0) == -2)
+                return -1;
             $conversationInfo["partner"] = $user;
             $conversationInfo["user"] = $partner;
             if($this->clusterPoint->logConversation($conversationInfo,1) == -2)
-                dd("ridim2");
-            return 1;
+                return -1;
+            return 0;
         }
         catch(\Exception $e){
-            return $e->getMessage();
+            return -1;
         }
     }
 
+    /**
+     * Updates the information of the user
+     *
+     * @param $userInfo     object, the information of the user that wants to be updated
+     * @param $languages    array, the list of languages
+     * @return int the status of the update
+     *                                          -2 ClusterPoint exception
+     *                                          0 done successfully
+     */
+    public function updateUserInfo($userInfo,$languages){
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            if($this->clusterPoint->updateUserInfo($userInfo,$languages) == -2)
+                return -1;
+            return 0;
+        }
+        catch(\Exception $e){
+            return -1;
+        }
+    }
+
+    /**
+     * Update the presence of the user
+     *
+     * @param $user
+     * @param $presence
+     * @internal param string $userID user id
+     * @return int
+     */
+    public function updateUserPresence($user,$presence){
+
+        try {
+            if($this->clusterPoint == null)
+                $this->clusterPoint = new Libraries\ClusterPoint();
+            $user["last_activity"] = date("Y-m-d H:i:s");
+            $user["is_present"] = $presence == "available" ? 1:0;
+            if($this->clusterPoint->updateUserInfo($user, $user["languages"]["language"]) == -2)
+                return -2;
+            return 0;
+        }
+        catch(\Exception $e){
+            return -2;
+        }
+    }
+
+    /**
+     * Get the information of the online users in a country
+     *
+     * @param $countryID int the id of the country
+     * @return array|int
+     */
     public function getOnlineUsersOfCountry($countryID){
         try {
             if($this->clusterPoint == null)
                 $this->clusterPoint = new Libraries\ClusterPoint();
-            return $this->clusterPoint->getOnlineUsers($countryID);
+            $onlineUsers = $this->clusterPoint->getOnlineUsers($countryID);
+            if($onlineUsers == -2)
+                return -2;
+            return $onlineUsers;
         }
         catch(\Exception $e){
+            return -2;
         }
     }
 
+    /**
+     * Get the partner of the partner that was calling
+     *
+     * @param $userInfo array the information of the user and the partner
+     * @return array|int
+     */
     public function getIncomingCall($userInfo){
         try {
             if($this->clusterPoint == null)
                 $this->clusterPoint = new Libraries\ClusterPoint();
-            $conversationInfo = [
-                "owner_id" => $userInfo["uuid"],
-                "partner_id" => $userInfo["partner_id"]->__toString(),
-                "rate" => 0,
-                "duration" => 0,
-                "x" => 35.753497,
-                "y" => 51.362583,
-                "type" => "conversation",
-                "country"   => "IR"
-            ];
-
-            return $this->clusterPoint->getConversationDetails($conversationInfo);
+            $partnerInfo = $this->clusterPoint->getConversationDetails($userInfo["user"],$userInfo["partner"]);
+            if($partnerInfo == -2)
+                return -2;
+            return $partnerInfo;
         }
         catch(\Exception $e){
+            return -2;
         }
-
-        return -1;
-    }
-
-    /**
-     * Gets the role of the user based on Email
-     * @param $member   string the member we want to get the role for
-     * @return User plus the role of the user,
-     *               1 -> Community Hero Member
-     *               2 -> Teatak Member
-     *               3 -> Community Member
-     */
-    //TODO: write unit tests
-    public function getUserRoleBasedOnEmail($member)
-    {
-        $this->getUserBasedOnEmail($member);
-        $userLevels = $this->UserModel->levels;
-        $resultLevel = 3;
-        foreach($userLevels as $level)
-        {
-            if($level->id == 5){//TODO: change 5 to constant
-                $resultLevel = 1;
-            }
-            else if($level->id == 6){//TODO: change 6 to constant
-                $resultLevel = 2;
-                break;
-            }
-        }
-        $this->UserModel->role = $resultLevel;
-        return $this->UserModel;
     }
 }

@@ -83,80 +83,29 @@ class UsersController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  $userID
-     * @param  $partnerID
-     * @return Response
-     */
-    //TODO: write unit tests
-    public function show($userID, $partnerID)
-    {
-        $userRepo = new UserRepository();
-        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
 
-        if ($userIDCluster == -1)
-            \App::abort(404, 'The API doesn\'t exist');
-
-        $partnerMainID = $userRepo->getUserBasedOnEmail($partnerID);
-
-        if ($partnerMainID == -1)
-            \App::abort(404, 'The API doesn\'t exist');
-
-        $userInfo = [
-            "uuid" => $userID,
-            "partner_id" => $partnerMainID];
-
-        $getInfo = $userRepo->getIncomingCall($userInfo);
-
-        return json_encode($getInfo);
-    }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  Request $request
-     * @param  $userID string the information of the user
-     * @return Response
+     * @param  $user    object the information of the user
+     * @param  $partner object the information of the partner
+     * @return \Response
      */
-    public function changePresence(Request $request, $userID)
+    public function logCall(Request $request, $user, $partner)
     {
-        $userRepo = new UserRepository();
-        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
-
-        if ($userIDCluster == -1)
-            \App::abort(404, 'The API doesn\'t exist');
-
-        $userRepo->updateUserPresence($userID);
-
-        return json_encode([]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  Request $request
-     * @param  $userID string the information of the user
-     * @param  $partnerID string the information of the partner
-     * @return Response
-     */
-    public function logCall(Request $request, $userID, $partnerID)
-    {
-        $userRepo = new UserRepository();
-        $user = $userRepo->getUserBasedOnUuid($userID);
-
         if ($user == -1)
             \App::abort(404, 'The API doesn\'t exist');
         else if($user == -2)
             \App::abort(500, 'cluster point didn\'t reply');
 
-        $partner = $userRepo->getUserBasedOnEmail($partnerID);
-
         if ($partner == -1)
             \App::abort(404, 'The API doesn\'t exist');
         else if($partner == -2)
             \App::abort(500, 'cluster point didn\'t reply');
+
+        $userRepo = new UserRepository();
 
         $result = [];
         if ($request->get('topic')) {
@@ -173,6 +122,60 @@ class UsersController extends Controller
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param  Request $request
+     * @param  $user object The information of the user
+     * @return \Response
+     */
+    //TODO: must write tests
+    public function update(Request $request, $user)
+    {
+        $userRepo = new UserRepository();
+
+        if ($user == -1)
+            \App::abort(404, 'The API doesn\'t exist');
+        else if($user == -2)
+            \App::abort(500, 'cluster point didn\'t reply');
+
+        $result = [];
+        if ($request->get('full_name') &&
+            $request->get('about') &&
+            $request->get('languages')
+        ) {
+            $user["full_name"] = $request->get('full_name');
+            $user["about"] = $request->get('about');
+
+            $languages = json_decode($request->get('languages'));
+
+            $result = $userRepo->updateUserInfo($user, $languages);
+        } else {
+            \App::abort(400, 'The contract of the api was not met');
+        }
+
+        return json_encode($result);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  Request $request
+     * @param $user
+     * @return Response
+     */
+    public function changePresence(Request $request, $user)
+    {
+        $userRepo = new UserRepository();
+
+        if ($user == -1)
+            \App::abort(404, 'The API doesn\'t exist');
+
+        $userRepo->updateUserPresence($user,"available");
+
+        return json_encode([]);
+    }
+
+    /**
+     * Update the specified resource in storage.
      * @param
      * @return Response
      */
@@ -184,74 +187,36 @@ class UsersController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Display the specified resource.
      *
-     * @param  Request $request
-     * @param  userID String the information of the user
-     * @return Response
+     * @param $user
+     * @param $partner
+     * @internal param $userID
+     * @internal param $partnerID
+     * @return \Response
      */
-    //TODO: must write tests
-    public function update(Request $request, $userID)
+    //TODO: write unit tests
+    public function show($user, $partner)
     {
         $userRepo = new UserRepository();
-        $userIDCluster = $userRepo->getUserBasedOnUuid($userID);
-        if ($userIDCluster == -1)
+
+        if ($user == -1)
             \App::abort(404, 'The API doesn\'t exist');
 
-        if ($request->get('full_name') &&
-            $request->get('about') &&
-            $request->get('languages')
-        ) {
-            $userInfo = [
-                "uuid" => $userID,
-                "full_name" => $request->get('full_name'),
-                "about" => $request->get('about')
-            ];
-
-            $languages = json_decode($request->get('languages'));
-
-            $userRepo->updateUserInfo($userInfo, $languages);
-        } else {
-            \App::abort(400, 'The contract of the api was not met');
-        }
-
-        return json_encode([]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-    /**
-     * Get the session for a user
-     *
-     * @param Request $request the request sent to the user
-     * @return Response         the user information
-     */
-    public function getImage(User $user)
-    {
-
-        if ($user->toArray() == [])
+        if ($partner == -1)
             \App::abort(404, 'The API doesn\'t exist');
-        $imageUrl = "";
-        $imageIndex = Libraries\ImageHelper::getTheCurrentImageIndex($user);
-        if ($imageIndex != -1) //the user has an image
-        {
-            $filePath = storage_path() . "\app\avatars\\" . $user->uuid . "$imageIndex.jpg";
 
-            return \Response::download($filePath, $user->first_name . ".jpg", [
-                'Content-Type' => 'text/jpeg',
-            ]);
-        }
-        \App::abort(404, 'The user doesn\'t have a valid image');
+        $userInfo = [
+            "user" => $user,
+            "partner" => $partner
+        ];
+
+        $getInfo = $userRepo->getIncomingCall($userInfo);
+
+        return json_encode($getInfo);
     }
+
+    //TODO---------------------Refactor from here below-------------------------
 
     /**
      * Get the image of the user
